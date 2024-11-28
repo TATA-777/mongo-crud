@@ -1,15 +1,15 @@
+import { auth } from '@/auth'
 import EditTopicForm from '@/components/EditTopicForm'
-import React from 'react'
-
-const apiurl = process.env.API_URL
+import { redirect } from 'next/navigation'
+const apiUrl = process.env.API_URL
 
 const getTopicById = async (id: string) => {
   try {
-    const res = await fetch(`${apiurl}/api/topics/${id}`, {
+    const res = await fetch(`${apiUrl}/api/topics/${id}`, {
       cache: 'no-store',
     })
     if (!res.ok) {
-      throw new Error('failed to fetch topic')
+      throw new Error('Failed to fetch topic.')
     }
     return res.json()
   } catch (error) {
@@ -17,7 +17,7 @@ const getTopicById = async (id: string) => {
   }
 }
 
-export default async function EditTopicPage({
+export default async function EditTopic({
   params,
 }: {
   params: { id: string }
@@ -25,6 +25,11 @@ export default async function EditTopicPage({
   const { id } = params
   const { topic } = await getTopicById(id)
   const { title, description } = topic
+
+  const session = await auth()
+  if (!session) {
+    redirect('/login')
+  }
 
   return <EditTopicForm id={id} title={title} description={description} />
 }

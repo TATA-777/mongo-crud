@@ -1,23 +1,28 @@
 'use client'
+import { useSession } from 'next-auth/react'
+import { redirect, useRouter } from 'next/navigation'
+import { useState } from 'react'
 
-import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
-
-export default function AddTopicPage() {
+export default function AddTopic() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const router = useRouter()
+  const { data: session } = useSession()
+
+  if (!session) {
+    redirect('/login')
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!title || !description) {
-      alert('Title and description are required')
+      alert('Title and description are required.')
     }
     try {
       const res = await fetch('/api/topics', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-type': 'application/json',
         },
         body: JSON.stringify({ title, description }),
       })
@@ -31,24 +36,25 @@ export default function AddTopicPage() {
       console.log(error)
     }
   }
+
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+    <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
       <input
         className="border border-slate-500 p-4"
         type="text"
         placeholder="Topic Title"
-        value={title}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setTitle(e.target.value)
         }
+        value={title}
       />
       <textarea
         className="border border-slate-500 p-4 h-32"
-        placeholder="Topic description"
-        value={description}
+        placeholder="Topic Description"
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
           setDescription(e.target.value)
         }
+        value={description}
       />
       <button
         className="bg-green-800 text-white font-bold px-6 py-3 w-fit rounded-md"
